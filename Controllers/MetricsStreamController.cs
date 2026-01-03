@@ -38,8 +38,6 @@ public class MetricsStreamController : ControllerBase
             await SendEvent(evt, ct);
         }
 
-        var connectionStart = DateTime.UtcNow;
-
         // Live stream
         while (!ct.IsCancellationRequested)
         {
