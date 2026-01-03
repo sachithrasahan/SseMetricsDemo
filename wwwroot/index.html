@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live System Metrics</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+    <div class="container py-4">
+        <h2 class="mb-4 text-center">📊 Live System Metrics</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <div class="card shadow-sm">
+                    <div class="card-header text-bg-primary">
+                        System Health (Real-time)
+                    </div>
+
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <strong>Time:</strong>
+                            <span id="time" class="badge bg-secondary"></span>
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>CPU Usage:</strong>
+                            <span id="cpu" class="badge bg-danger"></span>
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>Memory Usage:</strong>
+                            <span id="memory" class="badge bg-warning text-dark"></span>
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>Active Users:</strong>
+                            <span id="users" class="badge bg-info text-dark"></span>
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>Requests / Second:</strong>
+                            <span id="rps" class="badge bg-success"></span>
+                        </p>
+                    </div>
+
+                    <div class="card-footer text-muted text-center">
+                        Streaming via Server-Sent Events
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let source;
+
+        function connect() {
+            source = new EventSource("/api/v1/stream/system-metrics");
+
+            source.addEventListener("system-metric", e => {
+                const data = JSON.parse(e.data);
+
+                document.getElementById("time").textContent =
+                    new Date(data.TimestampUtc).toLocaleTimeString();
+
+                document.getElementById("cpu").textContent =
+                    `${data.CpuUsagePercent.toFixed(2)}%`;
+
+                document.getElementById("memory").textContent =
+                    `${data.MemoryUsagePercent.toFixed(2)}%`;
+
+                document.getElementById("users").textContent =
+                    data.ActiveUsers;
+
+                document.getElementById("rps").textContent =
+                    data.RequestsPerSecond;
+            });
+
+            source.onerror = () => {
+                console.warn("SSE disconnected. Reconnecting...");
+                source.close();
+                setTimeout(connect, 3000);
+            };
+        }
+
+        connect();
+    </script>
+
+</body>
+</html>

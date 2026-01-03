@@ -1,0 +1,6 @@
+@SseMetricsDemo_HostAddress = http://localhost:5139
+
+GET {{SseMetricsDemo_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
